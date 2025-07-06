@@ -25,6 +25,15 @@
         @endauth
     </div>
 
+    {{-- レビュー投稿ボタン（ゲストはログイン誘導） --}}
+    <div class="mb-4">
+        @auth
+            <a href="{{ route('reviews.create', ['shop_id' => $shop->id]) }}" class="btn btn-primary">レビューを書く</a>
+        @else
+            <a href="{{ route('login') }}" class="btn btn-outline-secondary">レビューを書く（ログインが必要）</a>
+        @endauth
+    </div>
+
     {{-- レビュー一覧 --}}
     <h3 class="mt-5 mb-3">レビュー一覧</h3>
 
@@ -50,22 +59,18 @@
 
                 <a href="{{ route('reviews.show', $review->id) }}" class="btn btn-sm btn-outline-secondary">詳細を見る</a>
 
-                {{-- 違反報告リンク --}}
+                {{-- 違反報告リンク（ログインユーザーのみ） --}}
                 @auth
-                    <a href="{{ route('violations.create', ['review_id' => $review->id]) }}" class="btn btn-sm btn-outline-danger ms-2">
-                        違反報告
-                    </a>
+                    <form method="GET" action="{{ route('violations.create') }}" class="d-inline ms-2">
+                        <input type="hidden" name="review_id" value="{{ $review->id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">違反報告</button>
+                    </form>
                 @endauth
             </div>
         </div>
     @empty
         <p>レビューはまだありません。</p>
     @endforelse
-
-    {{-- レビュー投稿リンク --}}
-    @auth
-        <a href="{{ route('reviews.create', ['shop_id' => $shop->id]) }}" class="btn btn-primary mt-3">レビューを投稿する</a>
-    @endauth
 </div>
 
 {{-- ブックマークAjax処理 --}}

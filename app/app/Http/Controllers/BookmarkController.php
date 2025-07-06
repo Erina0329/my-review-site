@@ -18,6 +18,8 @@ class BookmarkController extends Controller
         return view('bookmark.index', compact('bookmarks'));
     }
 
+
+
     /**
      * ブックマーク登録（Ajax・POST）
      */

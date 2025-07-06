@@ -21,11 +21,16 @@ class AdminController extends Controller
      */
     public function userList()
     {
-        // 各ユーザーの違反数をカウントして取得
-        $users = User::withCount('violations')->get();
+        // 各ユーザーのレビューに紐づく violations をカウントする
+        $users = User::withCount([
+            'reviews as violation_reports_count' => function ($query) {
+                $query->join('violations', 'reviews.id', '=', 'violations.review_id');
+            }
+        ])->get();
 
         return view('admin.user_list', compact('users'));
     }
+
 
     /**
      * ユーザー詳細（レビュー投稿と違反数含む）

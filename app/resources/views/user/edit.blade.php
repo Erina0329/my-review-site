@@ -43,7 +43,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">更新</button>
-        <a href="{{ route('user.mypage') }}" class="btn btn-secondary">戻る</a>
+        <a href="{{ route('mypage') }}" class="btn btn-secondary">戻る</a>
     </form>
 </div>
 @endsection

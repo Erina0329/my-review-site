@@ -3,29 +3,19 @@
 @section('title', 'ブックマーク一覧')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">ブックマーク一覧</h1>
+<div class="container py-4">
+    <h1 class="mb-4 text-center fw-bold">ブックマーク一覧</h1>
 
-    @if ($bookmarks->isEmpty())
-        <p>ブックマークはまだ登録されていません。</p>
-    @else
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            @foreach ($bookmarks as $bookmark)
-                <div class="col">
-                    <div class="card h-100">
-                        <img src="{{ $bookmark->shop->image }}" class="card-img-top" alt="{{ $bookmark->shop->name }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $bookmark->shop->name }}</h5>
-                            <p class="card-text">{{ $bookmark->shop->address }}</p>
-                            <p class="card-text">平均点：{{ number_format($bookmark->shop->average_score, 1) }} / 5</p>
-                            <a href="{{ route('shops.show', $bookmark->shop->id) }}" class="btn btn-outline-primary btn-sm">店舗詳細</a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+    @forelse ($bookmarks as $bookmark)
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ $bookmark->shop->name }}</h5>
+                <p class="card-text">{{ $bookmark->shop->address }}</p>
+                <a href="{{ route('shops.show', $bookmark->shop->id) }}" class="btn btn-outline-primary btn-sm">詳細を見る</a>
+            </div>
         </div>
-    @endif
-
-    <a href="{{ route('user.mypage') }}" class="btn btn-secondary mt-4">マイページへ戻る</a>
+    @empty
+        <p class="text-center">ブックマークはまだありません。</p>
+    @endforelse
 </div>
 @endsection

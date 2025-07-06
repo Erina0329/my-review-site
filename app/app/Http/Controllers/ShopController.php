@@ -7,22 +7,26 @@ use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-    // 店舗一覧
+    /**
+     * 店舗一覧表示
+     */
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
         $score = $request->input('score');
 
+        // 店舗とそのレビューを一緒に取得
         $query = Shop::with('reviews');
 
         // キーワード検索（店舗名・住所・レビュー内容）
         if ($keyword) {
-            $query->where('name', 'like', "%{$keyword}%")
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
                   ->orWhere('address', 'like', "%{$keyword}%")
-                  ->orWhereHas('reviews', function ($q) use ($keyword) {
-                      $q->where('title', 'like', "%{$keyword}%")
-                        ->orWhere('content', 'like', "%{$keyword}%");
+                  ->orWhereHas('reviews', function ($sub) use ($keyword) {
+                      $sub->where('review', 'like', "%{$keyword}%");
                   });
+            });
         }
 
         // レビュー点数で絞り込み
@@ -37,7 +41,9 @@ class ShopController extends Controller
         return view('shop.index', compact('shops'));
     }
 
-    // 店舗詳細
+    /**
+     * 店舗詳細表示
+     */
     public function show($id)
     {
         $shop = Shop::with(['reviews.user'])->findOrFail($id);

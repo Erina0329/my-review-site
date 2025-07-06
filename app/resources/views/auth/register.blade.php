@@ -47,6 +47,17 @@
                 {{-- 通常この項目のエラーは password に統合されているため、個別エラー不要 --}}
             </div>
 
+            {{-- ロール選択 --}}
+            <div class="mb-3">
+                <label for="role" class="form-label">登録種別</label>
+                <select name="role" required>
+                    <option value="1">一般ユーザー</option>
+                    <option value="2">店舗ユーザー</option>
+                    <option value="0">管理者</option>
+                </select>
+
+            </div>
+ 
             {{-- 登録ボタン・キャンセルボタン --}}
             <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-primary w-50 me-2">登録</button>

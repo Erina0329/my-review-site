@@ -13,14 +13,13 @@ use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\ShopAdminController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Webアプリケーションのルーティング設定ファイル
-|
 */
 
 // トップページ
@@ -31,91 +30,76 @@ Route::get('/', function () {
 })->name('home');
 
 // ゲスト用ホーム
-Route::get('/guest-home', function () {
-    return view('guest.home'); // Bladeファイル：resources/views/guest/home.blade.php
-})->middleware('guest')->name('guest.home');
+Route::get('/guest-home', [MainController::class, 'index'])
+    ->middleware('guest')
+    ->name('guest.home');
 
-// ログインページ
-Route::get('/login', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('login');
-Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
+// ログイン・ログアウト・登録
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+});
+
+// ログアウト
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::get('/register', [RegisteredUserController::class, 'create'])
-    ->middleware('guest')
-    ->name('register');
-
-Route::post('/register', [RegisteredUserController::class, 'store'])
-    ->middleware('guest');
-
-// Breeze ダッシュボード（ログイン後）
+// Breezeダッシュボード（不要なら削除OK）
 Route::get('/dashboard', function () {
     return view('dashboard');
-    })->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-// パスワード再設定リンク（表示）
-Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-    ->middleware('guest')
-    ->name('password.request');
+// ▼ 共通マイページ（ロールに応じてBlade内で切り替え）
+Route::middleware(['auth'])->get('/mypage', function () {
+    return view('mypage');
+})->name('mypage');
 
-// パスワード再設定リンク（送信処理）
-Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.email');
-
-
-// ログインが必要なユーザー機能
-Route::middleware('auth')->group(function () {
-    // Breeze プロフィール編集
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // ユーザーマイページ機能
-    Route::get('/mypage', [UserController::class, 'mypage'])->name('user.mypage');
+// ▼ 一般ユーザー機能（role = 1）
+Route::middleware(['auth'])->group(function () {
     Route::get('/mypage/edit', [UserController::class, 'edit'])->name('user.edit');
     Route::put('/mypage/update', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // ブックマーク機能
+    Route::get('/mypage/reviews', [ReviewController::class, 'myReviews'])->name('reviews.my');
+    Route::resource('reviews', ReviewController::class)->except(['index', 'show']);
+
     Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
     Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
     Route::delete('/bookmarks/{shop}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
 
-    // 違反報告機能
     Route::get('/report/create', [ViolationController::class, 'create'])->name('violations.create');
     Route::post('/report', [ViolationController::class, 'store'])->name('violations.store');
 });
 
-// 店舗情報（ログイン不要で閲覧可）
-Route::resource('shops', ShopController::class)->only(['index', 'show']);
+// ▼ 店舗管理ユーザー専用（role = 2）
+Route::middleware(['auth'])->prefix('shop-admin')->name('shop_admin.')->group(function () {
+    Route::get('/reviews', [ShopAdminController::class, 'reviews'])->name('reviews');
+    Route::get('/edit', [ShopAdminController::class, 'edit'])->name('edit');
+});
 
-// レビュー機能（ログイン必須）
-Route::resource('reviews', ReviewController::class)->middleware(['auth']);
-
-// 管理者用ルート（プレフィックス付き）
+// ▼ 管理ユーザー専用（role = 0）
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/mypage', [AdminController::class, 'mypage'])->name('mypage');
+    Route::get('/users', [AdminController::class, 'index'])->name('users.index');
+
     Route::get('/user_list', [AdminController::class, 'userList'])->name('user_list');
     Route::get('/user_detail/{id}', [AdminController::class, 'userDetail'])->name('user_detail');
     Route::get('/post_list', [AdminController::class, 'postList'])->name('post_list');
     Route::get('/post_detail/{id}', [AdminController::class, 'postDetail'])->name('post_detail');
     Route::get('/review_detail/{id}', [AdminController::class, 'reviewDetail'])->name('review_detail');
-
-Route::get('/register', [RegisteredUserController::class, 'create'])
-    ->middleware('guest')
-    ->name('register');
-
-Route::post('/register', [RegisteredUserController::class, 'store'])
-    ->middleware('guest');
-
-Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-    ->middleware('guest')
-    ->name('password.reset');
-
-Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.update');
-
+    Route::get('/users', [AdminController::class, 'userList'])->name('users.index');
+    Route::get('/posts', [AdminController::class, 'postList'])->name('posts.index');
+    Route::get('/posts/{id}', [AdminController::class, 'postDetail'])->name('posts.show');
 });
 
-// Breezeが提供するログイン・登録・リセットなどの認証ルート
+// ▼ 店舗閲覧（全ユーザーアクセス可）
+Route::resource('shops', ShopController::class)->only(['index', 'show']);
+
+// ▼ レビュー閲覧（全ユーザーアクセス可）
+Route::resource('reviews', ReviewController::class)->only(['index', 'show']);
+
 require __DIR__.'/auth.php';

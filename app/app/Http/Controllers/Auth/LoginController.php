@@ -73,4 +73,16 @@ class LoginController extends Controller
     {
         return route('user.mypage');
     }
+
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.mypage');
+        } elseif ($user->role === 'shop') {
+            return redirect()->route('shop_admin.mypage');
+        } else {
+            return redirect()->route('user.mypage');
+        }
+    }
+
 }

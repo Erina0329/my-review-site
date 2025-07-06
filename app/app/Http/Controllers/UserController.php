@@ -43,6 +43,6 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('user.mypage')->with('success', 'アカウント情報を更新しました。');
+        return redirect()->route('mypage')->with('success', 'アカウント情報を更新しました。');
     }
 }
