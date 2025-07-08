@@ -8,8 +8,8 @@
     <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Vite -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- ↓ Viteの記述を削除 --}}
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 <body>
     {{-- ナビゲーションバー --}}

@@ -11,6 +11,14 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="alert alert-danger small text-center">
+                @foreach ($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('password.email') }}">
             @csrf
 

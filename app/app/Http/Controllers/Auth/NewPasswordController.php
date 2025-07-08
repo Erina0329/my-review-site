@@ -13,10 +13,11 @@ class NewPasswordController extends Controller
     /**
      * リセット画面表示
      */
-    public function create(Request $request)
+    public function create()
     {
-        return view('auth.reset-password', ['request' => $request]);
+        return view('auth.forgot-password');
     }
+
 
     /**
      * パスワード更新処理
