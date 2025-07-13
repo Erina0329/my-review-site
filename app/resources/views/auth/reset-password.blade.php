@@ -5,7 +5,7 @@
 @section('content')
 <div class="container">
     <h1 class="mb-4">新しいパスワードの設定</h1>
-    <form method="POST" action="{{ route('password.update') }}">
+    <form method="POST" action="{{ route('password.store') }}">
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
         <input type="hidden" name="email" value="{{ $request->email }}">
