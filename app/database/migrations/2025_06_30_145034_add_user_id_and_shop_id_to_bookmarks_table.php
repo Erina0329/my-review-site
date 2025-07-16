@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('bookmarks', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->after('id');
-            $table->unsignedBigInteger('shop_id')->after('user_id');
+        Schema::create('bookmarks', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('shop_id');
 
             // 外部キー制約（任意）
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
