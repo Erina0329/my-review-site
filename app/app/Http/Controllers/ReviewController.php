@@ -46,18 +46,21 @@ class ReviewController extends Controller
             'image'   => 'nullable|image|max:2048',
         ]);
 
-        $path = null;
+        // dd($validated['content']);
+
+        // 画像アップロード処理（あれば）
+        $imagePath = null;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('reviews', 'public');
+            $imagePath = $request->file('image')->store('review_images', 'public');
         }
 
+        // レビュー保存
         Review::create([
-            'user_id' => Auth::id(),
             'shop_id' => $validated['shop_id'],
-            'title'   => $validated['title'],
-            'score'   => $validated['score'],
-            'content' => $validated['content'],
-            'image'   => $path,
+            'user_id' => Auth::id(),
+            'review' => $validated['content'],
+            'score' => $validated['score'],
+            'image_path' => $imagePath,
         ]);
 
         return redirect()->route('reviews.index')->with('success', 'レビューを投稿しました。');
@@ -89,23 +92,28 @@ class ReviewController extends Controller
     // 更新処理
     public function update(Request $request, $id)
     {
-        $review = Review::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $review = \App\Models\Review::findOrFail($id);
+
+        abort_unless(auth()->id() === $review->user_id, 403);
 
         $validated = $request->validate([
-            'title'   => 'required|max:100',
-            'score'   => 'required|integer|between:1,5',
-            'content' => 'required',
-            'image'   => 'nullable|image|max:2048',
+            'score' => 'required|integer|min:1|max:5',
+            'review' => 'required|string',
+            'image' => 'nullable|image|max:2048',
         ]);
 
+        // 画像があれば更新
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('reviews', 'public');
-            $review->image = $path;
+            $path = $request->file('image')->store('review_images', 'public');
+            $review->image_path = $path;
         }
 
-        $review->fill($validated)->save();
+        $review->score = $validated['score'];
+        $review->review = $validated['review'];
+        $review->save();
 
         return redirect()->route('reviews.index')->with('success', 'レビューを更新しました。');
     }
+
 
 }

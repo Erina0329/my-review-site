@@ -33,7 +33,8 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         {{-- 店舗画像（仮画像） --}}
-                        <img src="{{ asset('images/noimage.jpg') }}" class="card-img-top" alt="店舗画像">
+                        <!-- <img src="{{ asset($shop->image_path ?? 'images/no_image.jpg') }}" class="card-img-top" alt="{{ $shop->name }}"> -->
+                        <img src="{{ asset('storage/' . $shop->image_path) }}" alt="店舗画像" class="card-img-top">
 
                         <div class="card-body">
                             <h5 class="card-title">{{ $shop->name }}</h5>

@@ -34,6 +34,12 @@
             <a href="{{ route('admin.users.index') }}" class="list-group-item list-group-item-action">ユーザー一覧（通報件数順）</a>
             <a href="{{ route('admin.posts.index') }}" class="list-group-item list-group-item-action">投稿一覧（違反件数順）</a>
         </div>
+        <div class="mb-4">
+            <a href="{{ route('shops.create') }}" class="btn btn-success">店舗を新規登録する</a>
+        </div>
+        <div class="mb-4">
+            <a href="{{ route('shops.index') }}" class="btn btn-primary">飲食店一覧</a>
+        </div>
 
     @elseif(auth()->user()->role === 2)
         {{-- 店舗管理者用 --}}

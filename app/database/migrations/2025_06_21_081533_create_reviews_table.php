@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('shop_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->text('review');
+            $table->integer('score');
+            $table->string('image_path')->nullable();
+            // 外部キー制約（users.id に紐付け）
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

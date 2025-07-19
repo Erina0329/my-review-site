@@ -49,4 +49,37 @@ class ShopController extends Controller
         $shop = Shop::with(['reviews.user'])->findOrFail($id);
         return view('shop.show', compact('shop'));
     }
+
+
+    public function create()
+    {
+        // 管理者以外は403
+        abort_unless(auth()->user()->role === 0, 403);
+
+        return view('shop.create');
+    }
+
+    public function store(Request $request)
+    {
+        abort_unless(auth()->user()->role === 0, 403);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'address' => 'required|string|max:255',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public');
+        }
+
+        Shop::create([
+            'name' => $validated['name'],
+            'image_path' => $imagePath ?? 'images/noimage.jpg',
+            'address' => $validated['address'],
+        ]);
+
+        return redirect()->route('mypage')->with('success', '店舗を登録しました');
+    }
 }

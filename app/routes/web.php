@@ -80,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('shop-admin')->name('shop_admin.')->group(function () {
     Route::get('/reviews', [ShopAdminController::class, 'reviews'])->name('reviews');
     Route::get('/edit', [ShopAdminController::class, 'edit'])->name('edit');
+    Route::post('/update/{id}', [ShopAdminController::class, 'update'])->name('update');
 });
 
 // ▼ 管理ユーザー専用（role = 0）
@@ -97,9 +98,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 // ▼ 店舗閲覧（全ユーザーアクセス可）
-Route::resource('shops', ShopController::class)->only(['index', 'show']);
+Route::resource('shops', ShopController::class)->only(['index', 'show', 'create', 'store']);
 
 // ▼ レビュー閲覧（全ユーザーアクセス可）
-Route::resource('reviews', ReviewController::class)->only(['index', 'show']);
+Route::resource('reviews', ReviewController::class)->only(['index', 'show', 'edit', 'update']);
 
 require __DIR__.'/auth.php';

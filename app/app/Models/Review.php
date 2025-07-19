@@ -10,7 +10,7 @@ class Review extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'shop_id', 'title', 'score', 'content', 'image'
+        'user_id', 'shop_id', 'review', 'score', 'image_path'
     ];
 
     // 投稿者

@@ -10,6 +10,7 @@
         <p>まだレビューが投稿されていません。</p>
     @else
         @foreach ($reviews as $review)
+        @if ($review->user_id === Auth::id())
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">
@@ -27,6 +28,7 @@
                     </form>
                 </div>
             </div>
+        @endif
         @endforeach
     @endif
 </div>

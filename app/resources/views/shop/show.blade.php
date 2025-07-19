@@ -8,7 +8,8 @@
 
     {{-- 店舗情報 --}}
     <div class="mb-4">
-        <img src="{{ $shop->image }}" class="img-fluid mb-2" alt="{{ $shop->name }}">
+        <img src="{{ asset($shop->image_path ?? 'images/no_image.jpg') }}" class="img-fluid mb-2" alt="{{ $shop->name }}">
+
         <p><strong>住所：</strong>{{ $shop->address }}</p>
         <p><strong>紹介：</strong>{{ $shop->comment }}</p>
         <p><strong>平均スコア：</strong>{{ number_format($shop->average_score, 1) }} / 5</p>
@@ -27,11 +28,13 @@
 
     {{-- レビュー投稿ボタン（ゲストはログイン誘導） --}}
     <div class="mb-4">
+        @if(Auth::user() && Auth::user()->role === 1)
         @auth
             <a href="{{ route('reviews.create', ['shop_id' => $shop->id]) }}" class="btn btn-primary">レビューを書く</a>
         @else
             <a href="{{ route('login') }}" class="btn btn-outline-secondary">レビューを書く（ログインが必要）</a>
         @endauth
+        @endif
     </div>
 
     {{-- レビュー一覧 --}}

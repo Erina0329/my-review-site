@@ -13,7 +13,11 @@
     {{-- ナビゲーションバー --}}
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
+            @if(Auth::user() && Auth::user()->role === 0 || Auth::user() && Auth::user()->role === 2)
+            <a class="navbar-brand" href="{{ route('mypage') }}">レビューサイト</a>
+            @else
             <a class="navbar-brand" href="{{ route('home') }}">レビューサイト</a>
+            @endif
 
             <!--  追加：ナビバー展開用ボタン -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
