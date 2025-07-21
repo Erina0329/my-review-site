@@ -29,10 +29,16 @@ class BookmarkController extends Controller
             'shop_id' => 'required|exists:shops,id',
         ]);
 
-        Bookmark::firstOrCreate([
-            'user_id' => Auth::id(),
-            'shop_id' => $request->shop_id,
-        ]);
+        $user = Auth::user();
+
+        // すでに登録済みか確認
+        $exists = $user->bookmarks()->where('shop_id', $request->shop_id)->exists();
+
+        if (! $exists) {
+            $user->bookmarks()->create([
+                'shop_id' => $request->shop_id,
+            ]);
+        }
 
         return response()->json(['status' => 'bookmarked']);
     }
@@ -40,11 +46,13 @@ class BookmarkController extends Controller
     /**
      * ブックマーク削除（Ajax・DELETE）
      */
-    public function destroy($shopId)
+    public function destroy(Shop $shop)
     {
-        Bookmark::where('user_id', Auth::id())
-                ->where('shop_id', $shopId)
-                ->delete();
+        $user = Auth::user();
+
+        $user->bookmarks()
+            ->where('shop_id', $shop->id)
+            ->delete();
 
         return response()->json(['status' => 'unbookmarked']);
     }

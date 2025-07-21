@@ -17,13 +17,22 @@
         {{-- ブックマークボタン --}}
         @auth
             @if ($shop->isBookmarkedBy(Auth::user()))
-                <button class="btn btn-secondary" disabled>ブックマーク済み</button>
+                <button id="bookmark-btn"
+                        data-bookmarked="true"
+                        data-shop-id="{{ $shop->id }}"
+                        class="btn btn-secondary">
+                    ブックマーク済み
+                </button>
             @else
-                <button id="bookmark-btn" data-shop-id="{{ $shop->id }}" class="btn btn-outline-primary">
+                <button id="bookmark-btn"
+                        data-bookmarked="false"
+                        data-shop-id="{{ $shop->id }}"
+                        class="btn btn-outline-primary">
                     ブックマーク
                 </button>
             @endif
         @endauth
+
     </div>
 
     {{-- レビュー投稿ボタン（ゲストはログイン誘導） --}}
@@ -77,31 +86,49 @@
 </div>
 
 {{-- ブックマークAjax処理 --}}
-@auth
-    @if (!$shop->isBookmarkedBy(Auth::user()))
-        <script>
-            document.getElementById('bookmark-btn').addEventListener('click', function () {
-                const shopId = this.dataset.shopId;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('bookmark-btn');
+    if (!btn) return;
 
-                fetch('/bookmarks', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ shop_id: shopId })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'bookmarked') {
-                        alert('ブックマークしました');
-                        location.reload();
-                    } else {
-                        alert('登録失敗');
-                    }
-                });
-            });
-        </script>
-    @endif
-@endauth
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    btn.addEventListener('click', function () {
+        const shopId = btn.getAttribute('data-shop-id');
+        const isBookmarked = btn.getAttribute('data-bookmarked') === 'true';
+
+        const method = isBookmarked ? 'DELETE' : 'POST';
+        const url = '/bookmarks' + (isBookmarked ? `/${shopId}` : '');
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+            },
+            body: isBookmarked ? null : JSON.stringify({ shop_id: shopId })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Network error');
+            return res.json();
+        })
+        .then(data => {
+            if (isBookmarked) {
+                btn.textContent = 'ブックマーク';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-primary');
+                btn.setAttribute('data-bookmarked', 'false');
+            } else {
+                btn.textContent = 'ブックマーク済み';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-secondary');
+                btn.setAttribute('data-bookmarked', 'true');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+        });
+    });
+});
+</script>
 @endsection

@@ -116,4 +116,10 @@ class ReviewController extends Controller
     }
 
 
+    public function softDelete(Review $review)
+    {
+        $review->delete(); // 論理削除
+        return redirect()->route('admin.post_list')->with('success', 'レビューを公開停止にしました。');
+    }
+
 }

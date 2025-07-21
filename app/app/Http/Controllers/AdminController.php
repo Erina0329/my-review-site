@@ -22,11 +22,12 @@ class AdminController extends Controller
     public function userList()
     {
         // 各ユーザーのレビューに紐づく violations をカウントする
-        $users = User::withCount([
-            'reviews as violation_reports_count' => function ($query) {
-                $query->join('violations', 'reviews.id', '=', 'violations.review_id');
-            }
-        ])->get();
+        $users = User::withTrashed()->withCount(['reviews as hidden_reviews_count' => function ($query) {
+            $query->onlyTrashed(); // 論理削除された投稿のみ
+        }])
+        ->orderByDesc('hidden_reviews_count')
+        ->take(10)
+        ->get();
 
         return view('admin.user_list', compact('users'));
     }
@@ -45,7 +46,18 @@ class AdminController extends Controller
    
     public function postList()
     {
-    $reviews = Review::with(['user', 'shop', 'violations'])->get();
+        $reviews = Review::withTrashed()
+            ->with(['user', 'shop', 'violations'])
+            ->withCount('violations')
+            ->orderByDesc('violations_count')
+            ->take(50) // 一旦多めに取得して後で制御できるようにする
+            ->get();
+
+        // ここで user が存在するレビューだけに絞る（論理削除されたユーザーも含めるには不要）
+        $reviews = $reviews->filter(function ($review) {
+            return $review->user !== null; // もしくは任意の条件
+        })->take(20); // ここで最終的に20件に絞る
+
     return view('admin.post_list', compact('reviews'));
     }
     

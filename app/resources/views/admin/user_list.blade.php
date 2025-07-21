@@ -6,31 +6,39 @@
 <div class="container">
     <h1 class="mb-4">ユーザー一覧</h1>
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
+    <table class="table">
+        <thead>
             <tr>
-                <th>ID</th>
-                <th>名前</th>
+                <th>ユーザー名</th>
                 <th>メールアドレス</th>
-                <th>登録日</th>
-                <th>違反報告数</th>
-                <th>詳細</th>
+                <th>非表示投稿数</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($users as $user)
             <tr>
-                <td>{{ $user->id }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
-                <td>{{ $user->created_at->format('Y-m-d') }}</td>
-                <td>{{ $user->violations_count }}</td>
+                <td>{{ $user->hidden_reviews_count }}</td>
                 <td>
-                    <a href="{{ route('admin.user_detail', ['id' => $user->id]) }}" class="btn btn-sm btn-outline-primary">詳細</a>
+                    
+                    @if ($user->deleted_at)
+                    <span class="badge bg-danger">利用停止中</span>
+                    @else
+                        <a href="{{ route('admin.user_detail', $user->id) }}" class="btn btn-outline-primary btn-sm">詳細</a>
+                        <form action="{{ route('admin.user_suspend', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('このユーザーを停止しますか？')">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-danger btn-sm">利用停止</button>
+                        </form>
+                    @endif
                 </td>
+
             </tr>
             @endforeach
         </tbody>
     </table>
+
 </div>
 @endsection

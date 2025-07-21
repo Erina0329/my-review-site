@@ -19,10 +19,10 @@
 
         @if(auth()->user()->role !== 0) {{-- 管理者は編集・退会不可 --}}
             <a href="{{ route('user.edit') }}" class="btn btn-outline-secondary btn-sm">アカウント編集</a>
-            <form method="POST" action="{{ route('profile.destroy') }}" class="d-inline ms-2" onsubmit="return confirm('本当に退会しますか？');">
+            <form action="{{ route('admin.user_suspend', auth()->user()->id) }}" method="POST" class="d-inline" onsubmit="return confirm('本当に退会しますか？')">
                 @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-outline-danger btn-sm">退会</button>
+                @method('PATCH')
+                <button type="submit" class="btn btn-danger btn-sm">退会</button>
             </form>
         @endif
     </div>

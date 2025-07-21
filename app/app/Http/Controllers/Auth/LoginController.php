@@ -71,7 +71,7 @@ class LoginController extends Controller
      */
     protected function redirectTo()
     {
-        return route('user.mypage');
+        return route('shops.index');
     }
 
     protected function authenticated(Request $request, $user)

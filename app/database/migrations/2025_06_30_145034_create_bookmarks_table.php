@@ -19,6 +19,7 @@ return new class extends Migration
             // 外部キー制約（任意）
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

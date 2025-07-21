@@ -25,6 +25,13 @@
         @if ($review->violations->isEmpty())
             <p>違反報告はありません。</p>
         @else
+            <div class="m-4">
+                <form action="{{ route('admin.review_soft_delete', $review->id) }}" method="POST" onsubmit="return confirm('このレビューを公開停止にしますか？')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm">停止</button>
+                </form>
+            </div>
             <table class="table table-bordered">
                 <thead class="table-light">
                     <tr>

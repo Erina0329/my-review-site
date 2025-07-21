@@ -5,6 +5,16 @@
 @section('content')
 <div class="container py-4">
     <h1 class="mb-4 text-center fw-bold">飲食店一覧</h1>
+    <div class="mb-3 text-end">
+        <a href="{{ route('mypage') }}" class="btn btn-success">
+            マイページ
+        </a>
+    </div>
+    <div class="mb-3 text-end">
+        <a href="{{ route('bookmarks.index') }}" class="btn btn-success">
+            ブックマーク一覧を見る
+        </a>
+    </div>
 
     {{-- 検索フォーム --}}
     <form method="GET" action="{{ route('shops.index') }}" class="row g-3 mb-4">

@@ -95,6 +95,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/users', [AdminController::class, 'userList'])->name('users.index');
     Route::get('/posts', [AdminController::class, 'postList'])->name('posts.index');
     Route::get('/posts/{id}', [AdminController::class, 'postDetail'])->name('posts.show');
+    Route::delete('reviews/{review}/soft-delete', [ReviewController::class, 'softDelete'])->name('review_soft_delete');
+    Route::patch('/admin/users/{user}/suspend', [UserController::class, 'suspend'])->name('user_suspend');
+
 });
 
 // ▼ 店舗閲覧（全ユーザーアクセス可）
