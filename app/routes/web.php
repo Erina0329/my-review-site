@@ -26,7 +26,7 @@ use App\Http\Controllers\ShopAdminController;
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('shops.index')        // ログイン済み → 店舗一覧
-        : redirect()->route('guest.home');        // ゲスト → ゲスト用トップページ
+        : redirect()->route('shops.index');        // ゲスト → ゲスト用トップページ
 })->name('home');
 
 // ゲスト用ホーム
