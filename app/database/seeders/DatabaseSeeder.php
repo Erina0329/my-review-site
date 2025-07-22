@@ -14,6 +14,7 @@ User::create([
     'role' => 0,
 ]);
 
+
 class DatabaseSeeder extends Seeder
 {
     /**
