@@ -64,8 +64,8 @@
 
                 <p class="card-text">
                     <small class="text-muted">
-                        投稿者: {{ $review->user->name }} /
-                        投稿日: {{ $review->created_at->format('Y-m-d') }}
+                        投稿者: {{ $review->user->name ?? '退会ユーザー' }} /
+                        投稿日: {{ $review->created_at->format('Y-m-d') ?? null }}
                     </small>
                 </p>
 

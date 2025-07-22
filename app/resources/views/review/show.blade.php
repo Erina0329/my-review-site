@@ -20,7 +20,7 @@
                 <span class="text-warning">★{{ $review->score }}</span>
             </p>
 
-            <p class="card-text"><strong>投稿者：</strong>{{ $review->user->name }}</p>
+            <p class="card-text"><strong>投稿者：</strong>{{ $review->user->name ?? '退会ユーザー' }}</p>
             <p class="card-text"><strong>レビュー内容：</strong></p>
             <p class="card-text">{{ $review->review }}</p>
 

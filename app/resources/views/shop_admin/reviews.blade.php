@@ -11,7 +11,7 @@
             <div class="card-body">
                 <p class="card-text">{{ $review->review }}</p>
                 <p><strong>評価：</strong> <span class="text-warning">★{{ $review->score }}</span></p>
-                <p><strong>投稿者：</strong> {{ $review->user->name }} / {{ $review->created_at->format('Y-m-d') }}</p>
+                <p><strong>投稿者：</strong> {{ $review->user->name ?? '退会ユーザー' }} / {{ $review->created_at->format('Y-m-d') }}</p>
                 @if ($review->image_path)
                     <img src="{{ asset('storage/' . $review->image_path) }}" alt="レビュー画像" style="max-height: 150px;">
                 @endif

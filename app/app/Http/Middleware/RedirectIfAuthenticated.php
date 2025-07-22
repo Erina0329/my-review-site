@@ -23,6 +23,11 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 return redirect(RouteServiceProvider::HOME);
             }
+            // if (Auth::user() && Auth::user()->role == 0) {
+            //     return redirect(RouteServiceProvider::ADMINHOME);
+            // } else {
+            //     return redirect(RouteServiceProvider::HOME);
+            // }
         }
 
         return $next($request);
