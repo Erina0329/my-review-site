@@ -39,25 +39,28 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'shop_id' => 'required|exists:shops,id',
+            'shop_name' => 'required|string|max:255',
             'title'   => 'required|max:100',
             'score'   => 'required|integer|between:1,5',
             'content' => 'required',
             'image'   => 'nullable|image|max:2048',
         ]);
 
-        // dd($validated['content']);
+
+        /// 店舗名から検索、なければ作成
+        $shop = Shop::firstOrCreate(['name' => $validated['shop_name']]);
 
         // 画像アップロード処理（あれば）
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('review_images', 'public');
-        }
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('review_images', 'public')
+            : null;
+
 
         // レビュー保存
         Review::create([
-            'shop_id' => $validated['shop_id'],
+            'shop_id' => $shop->id, 
             'user_id' => Auth::id(),
+            'title' => $validated['title'], 
             'review' => $validated['content'],
             'score' => $validated['score'],
             'image_path' => $imagePath,

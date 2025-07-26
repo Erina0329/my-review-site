@@ -14,11 +14,11 @@ class ShopController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-        $minScore = $request->input('min_score') ? floor($request->input('min_score')) : null;
-        $maxScore = $request->input('max_score') ? floor($request->input('max_score')) : null;
+        $minScore = $request->input('min_score') !== null ? (int)$request->input('min_score') : null;
+        $maxScore = $request->input('max_score') !== null ? (int)$request->input('max_score') : null;
 
         // 店舗情報と平均レビュー点を計算
-        $query = Shop::select('shops.*', DB::raw('AVG(reviews.score) as avg_score'))
+        $query = Shop::select('shops.*', DB::raw('IFNULL(AVG(reviews.score), 0) as avg_score'))
             ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
             ->groupBy('shops.id');
 
@@ -31,19 +31,20 @@ class ShopController extends Controller
             });
         }
 
-        // 平均レビュー点数で絞り込み（整数化して比較）
-        if ($minScore && $maxScore) {
-            $query->havingRaw('FLOOR(AVG(reviews.score)) BETWEEN ? AND ?', [$minScore, $maxScore]);
-        } elseif ($minScore) {
-            $query->havingRaw('FLOOR(AVG(reviews.score)) >= ?', [$minScore]);
-        } elseif ($maxScore) {
-            $query->havingRaw('FLOOR(AVG(reviews.score)) <= ?', [$maxScore]);
+        // 平均レビュー点数で範囲検索
+        if ($minScore !== null && $maxScore !== null) {
+            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) BETWEEN ? AND ?', [$minScore, $maxScore]);
+        } elseif ($minScore !== null) {
+            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) >= ?', [$minScore]);
+        } elseif ($maxScore !== null) {
+            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) <= ?', [$maxScore]);
         }
 
         $shops = $query->get();
 
         return view('shop.index', compact('shops'));
     }
+
 
 
     /**

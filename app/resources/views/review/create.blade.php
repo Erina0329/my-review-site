@@ -23,7 +23,7 @@
         {{-- 店舗名（readonly） --}}
         <div class="mb-3">
             <label class="form-label">店舗名</label>
-            <input type="text" class="form-control" value="{{ $shop->name }}" readonly>
+            <input type="text" name="shop_name" class="form-control" value="{{ old('shop_name') }}">
             <input type="hidden" name="shop_id" value="{{ $shop->id }}">
         </div>
 
