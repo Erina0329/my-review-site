@@ -12,11 +12,12 @@ class ViolationController extends Controller
     // 違反報告フォーム
     public function create(Request $request)
     {
-        $review = Review::findOrFail($request->input('review_id'));
+        $reviewId = $request->query('review_id'); // URLパラメータからレビューID取得
+        $review = Review::with('user', 'shop')->findOrFail($reviewId);
+
         return view('report.create', compact('review'));
     }
 
-    // 違反報告登録処理
     public function store(Request $request)
     {
         $request->validate([
@@ -25,11 +26,19 @@ class ViolationController extends Controller
         ]);
 
         Violation::create([
-            'user_id' => Auth::id(),
+            'user_id' => auth()->id(),
             'review_id' => $request->review_id,
             'reason' => $request->reason,
         ]);
 
-        return redirect()->route('reviews.index')->with('success', '違反報告を送信しました。');
+        // リダイレクト先が送信されていたらそこへ戻す
+        if ($request->filled('redirect_to')) {
+            return redirect($request->input('redirect_to'))
+                ->with('success', '違反報告を送信しました。');
+        }
+
+        // デフォルトの遷移先（なければレビュー詳細へ）
+        return redirect()->route('reviews.show', $request->review_id)
+                        ->with('success', '違反報告を送信しました。');
     }
 }

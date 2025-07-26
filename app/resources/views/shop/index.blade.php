@@ -18,18 +18,22 @@
 
     {{-- 検索フォーム --}}
     <form method="GET" action="{{ route('shops.index') }}" class="row g-3 mb-4">
-        <div class="col-md-6">
-            <input type="text" name="keyword" class="form-control" placeholder="店舗名・住所・レビューで検索" value="{{ request('keyword') }}">
+        <div class="col-md-4">
+            <input type="text" name="keyword" class="form-control"
+                placeholder="店舗名・住所・レビューで検索" value="{{ request('keyword') }}">
         </div>
-        <div class="col-md-3">
-            <select name="score" class="form-select">
-                <option value="">レビュー点で絞り込み</option>
-                @for ($i = 1; $i <= 5; $i++)
-                    <option value="{{ $i }}" {{ request('score') == $i ? 'selected' : '' }}>{{ $i }} 点</option>
-                @endfor
-            </select>
+
+        <div class="col-md-2">
+            <input type="number" name="min_score" class="form-control"
+                placeholder="最低点" min="1" max="5" value="{{ request('min_score') }}">
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2">
+            <input type="number" name="max_score" class="form-control"
+                placeholder="最高点" min="1" max="5" value="{{ request('max_score') }}">
+        </div>
+
+        <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">検索</button>
         </div>
     </form>

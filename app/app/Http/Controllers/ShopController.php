@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shop;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
@@ -13,33 +14,37 @@ class ShopController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-        $score = $request->input('score');
+        $minScore = $request->input('min_score') ? floor($request->input('min_score')) : null;
+        $maxScore = $request->input('max_score') ? floor($request->input('max_score')) : null;
 
-        // 店舗とそのレビューを一緒に取得
-        $query = Shop::with('reviews');
+        // 店舗情報と平均レビュー点を計算
+        $query = Shop::select('shops.*', DB::raw('AVG(reviews.score) as avg_score'))
+            ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
+            ->groupBy('shops.id');
 
-        // キーワード検索（店舗名・住所・レビュー内容）
+        // キーワード検索
         if ($keyword) {
             $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('address', 'like', "%{$keyword}%")
-                  ->orWhereHas('reviews', function ($sub) use ($keyword) {
-                      $sub->where('review', 'like', "%{$keyword}%");
-                  });
+                $q->where('shops.name', 'like', "%{$keyword}%")
+                ->orWhere('shops.address', 'like', "%{$keyword}%")
+                ->orWhere('reviews.content', 'like', "%{$keyword}%");
             });
         }
 
-        // レビュー点数で絞り込み
-        if ($score) {
-            $query->whereHas('reviews', function ($q) use ($score) {
-                $q->where('score', $score);
-            });
+        // 平均レビュー点数で絞り込み（整数化して比較）
+        if ($minScore && $maxScore) {
+            $query->havingRaw('FLOOR(AVG(reviews.score)) BETWEEN ? AND ?', [$minScore, $maxScore]);
+        } elseif ($minScore) {
+            $query->havingRaw('FLOOR(AVG(reviews.score)) >= ?', [$minScore]);
+        } elseif ($maxScore) {
+            $query->havingRaw('FLOOR(AVG(reviews.score)) <= ?', [$maxScore]);
         }
 
         $shops = $query->get();
 
         return view('shop.index', compact('shops'));
     }
+
 
     /**
      * 店舗詳細表示
@@ -50,18 +55,15 @@ class ShopController extends Controller
         return view('shop.show', compact('shop'));
     }
 
-
     public function create()
     {
-        // 管理者以外は403
-        abort_unless(auth()->user()->role === 0, 403);
-
+        abort_unless(in_array(auth()->user()->role, [0, 2]), 403);
         return view('shop.create');
     }
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->role === 0, 403);
+        abort_unless(in_array(auth()->user()->role, [0, 2]), 403);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -69,14 +71,14 @@ class ShopController extends Controller
             'address' => 'required|string|max:255',
         ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public');
-        }
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('images', 'public')
+            : 'images/noimage.jpg';
 
         Shop::create([
+            'user_id'    => auth()->id(),
             'name' => $validated['name'],
-            'image_path' => $imagePath ?? 'images/noimage.jpg',
+            'image_path' => $imagePath,
             'address' => $validated['address'],
         ]);
 

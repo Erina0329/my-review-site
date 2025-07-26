@@ -8,24 +8,24 @@
 
     <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 </head>
 <body>
     {{-- ナビゲーションバー --}}
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            @if(Auth::user() && Auth::user()->role === 0 || Auth::user() && Auth::user()->role === 2)
-            <a class="navbar-brand" href="{{ route('mypage') }}">レビューサイト</a>
-            @else
-            <a class="navbar-brand" href="{{ route('home') }}">レビューサイト</a>
-            @endif
+            <a class="navbar-brand" 
+               href="@if(Auth::check() && Auth::user()->role === 0)
+                        {{ route('mypage') }}
+                     @else
+                        {{ route('shops.index') }}
+                     @endif">
+               レビューサイト
+            </a>
 
-            <!--  追加：ナビバー展開用ボタン -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!--  id追加 -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     @auth
@@ -62,7 +62,6 @@
         @yield('content')
     </main>
 
-    {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -43,23 +43,34 @@ class AdminController extends Controller
         return view('admin.user_detail', compact('user'));
     }
 
-   
-    public function postList()
+   public function postList()
     {
-        $reviews = Review::withTrashed()
-            ->with(['user', 'shop', 'violations'])
-            ->withCount('violations')
-            ->orderByDesc('violations_count')
-            ->take(50) // 一旦多めに取得して後で制御できるようにする
-            ->get();
+        $reviews = Review::withTrashed() // 論理削除されたレビューも含む
+            ->with(['user', 'shop'])     // 投稿者と店舗情報も取得
+            ->withCount('violations')    // 違反報告件数をカウント
+            ->orderByDesc('violations_count') // 違反件数が多い順に並べる
+            ->orderByDesc('created_at')  // 同じ件数なら新しい順
+            ->paginate(20); // 1ページ20件ずつ表示
 
-        // ここで user が存在するレビューだけに絞る（論理削除されたユーザーも含めるには不要）
-        $reviews = $reviews->filter(function ($review) {
-            return $review->user !== null; // もしくは任意の条件
-        })->take(20); // ここで最終的に20件に絞る
-
-    return view('admin.post_list', compact('reviews'));
+        return view('admin.post_list', compact('reviews'));
     }
+
+    // public function postList()
+    // {
+    //     $reviews = Review::withTrashed()
+    //         ->with(['user', 'shop', 'violations'])
+    //         ->withCount('violations')
+    //         ->orderByDesc('violations_count')
+    //         ->take(50) // 一旦多めに取得して後で制御できるようにする
+    //         ->get();
+
+    //     // ここで user が存在するレビューだけに絞る（論理削除されたユーザーも含めるには不要）
+    //     $reviews = $reviews->filter(function ($review) {
+    //         return $review->user !== null; // もしくは任意の条件
+    //     })->take(20); // ここで最終的に20件に絞る
+
+    // return view('admin.post_list', compact('reviews'));
+    // }
     
     public function postDetail($id)
     {
@@ -68,6 +79,7 @@ class AdminController extends Controller
     return view('admin.post_detail', compact('review'));
     }
 
+    
     public function reviewDetail($id)
     {
     $review = Review::with(['user', 'shop', 'violations.user'])

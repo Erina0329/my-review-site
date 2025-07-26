@@ -100,6 +100,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 });
 
+
 // ▼ 店舗閲覧（全ユーザーアクセス可）
 Route::resource('shops', ShopController::class)->only(['index', 'show', 'create', 'store']);
 
