@@ -5,15 +5,12 @@
 @section('content')
 <div class="container py-4">
     <h1 class="mb-4 text-center fw-bold">飲食店一覧</h1>
+
     <div class="mb-3 text-end">
-        <a href="{{ route('mypage') }}" class="btn btn-success">
-            マイページ
-        </a>
+        <a href="{{ route('mypage') }}" class="btn btn-success">マイページ</a>
     </div>
     <div class="mb-3 text-end">
-        <a href="{{ route('bookmarks.index') }}" class="btn btn-success">
-            ブックマーク一覧を見る
-        </a>
+        <a href="{{ route('bookmarks.index') }}" class="btn btn-success">ブックマーク一覧を見る</a>
     </div>
 
     {{-- 検索フォーム --}}
@@ -46,27 +43,27 @@
             @foreach($shops as $shop)
                 <div class="col">
                     <div class="card h-100 shadow-sm">
-                        {{-- 店舗画像（仮画像） --}}
-                        <!-- <img src="{{ asset($shop->image_path ?? 'images/no_image.jpg') }}" class="card-img-top" alt="{{ $shop->name }}"> -->
-                        <img src="{{ asset('storage/' . $shop->image_path) }}" alt="店舗画像" class="card-img-top">
+                        {{-- 店舗画像 --}}
+                        <img src="{{ asset('storage/' . $shop->image_path) }}" 
+                             alt="店舗画像" class="card-img-top">
 
                         <div class="card-body">
                             <h5 class="card-title">{{ $shop->name }}</h5>
 
-                            {{-- 平均スコア --}}
-                            @php
-                                $average = $shop->reviews->avg('score');
-                            @endphp
+                            {{-- 平均スコア（Controllerで計算したavg_scoreを使用） --}}
                             <p class="mb-1">
                                 <strong>平均レビュー点：</strong>
-                                {{ $average ? number_format($average, 1) . ' / 5.0' : 'レビューなし' }}
+                                {{ $shop->avg_score !== null && $shop->avg_score > 0 
+                                    ? number_format($shop->avg_score, 1) . ' / 5.0' 
+                                    : 'レビューなし' }}
                             </p>
 
                             <p class="mb-1"><strong>住所：</strong>{{ $shop->address }}</p>
                         </div>
 
                         <div class="card-footer bg-white border-top-0 text-end">
-                            <a href="{{ route('shops.show', $shop->id) }}" class="btn btn-outline-primary btn-sm">詳細を見る</a>
+                            <a href="{{ route('shops.show', $shop->id) }}" 
+                               class="btn btn-outline-primary btn-sm">詳細を見る</a>
                         </div>
                     </div>
                 </div>

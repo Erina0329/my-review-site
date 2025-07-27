@@ -14,11 +14,11 @@ class ShopController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-        $minScore = $request->input('min_score') !== null ? (int)$request->input('min_score') : null;
-        $maxScore = $request->input('max_score') !== null ? (int)$request->input('max_score') : null;
+        $minScore = $request->filled('min_score') ? (float)$request->input('min_score') : null;
+        $maxScore = $request->filled('max_score') ? (float)$request->input('max_score') : null;
 
-        // 店舗情報と平均レビュー点を計算
-        $query = Shop::select('shops.*', DB::raw('IFNULL(AVG(reviews.score), 0) as avg_score'))
+        // ★ 検索する前は全店舗（レビューがなくても表示）
+        $query = Shop::select('shops.*', DB::raw('AVG(reviews.score) as avg_score'))
             ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
             ->groupBy('shops.id');
 
@@ -31,20 +31,23 @@ class ShopController extends Controller
             });
         }
 
-        // 平均レビュー点数で範囲検索
-        if ($minScore !== null && $maxScore !== null) {
-            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) BETWEEN ? AND ?', [$minScore, $maxScore]);
-        } elseif ($minScore !== null) {
-            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) >= ?', [$minScore]);
-        } elseif ($maxScore !== null) {
-            $query->havingRaw('ROUND(IFNULL(AVG(reviews.score), 0), 1) <= ?', [$maxScore]);
+        // ★ min_score または max_score が指定された場合のみ HAVING を適用
+        if (!is_null($minScore) || !is_null($maxScore)) {
+            $query->havingRaw('COUNT(reviews.id) > 0'); // レビューがある店舗だけ
+
+            if (!is_null($minScore) && !is_null($maxScore)) {
+                $query->havingRaw('AVG(reviews.score) BETWEEN ? AND ?', [$minScore, $maxScore]);
+            } elseif (!is_null($minScore)) {
+                $query->havingRaw('AVG(reviews.score) >= ?', [$minScore]);
+            } elseif (!is_null($maxScore)) {
+                $query->havingRaw('AVG(reviews.score) <= ?', [$maxScore]);
+            }
         }
 
         $shops = $query->get();
 
         return view('shop.index', compact('shops'));
     }
-
 
 
     /**
